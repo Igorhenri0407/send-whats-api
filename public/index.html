@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <title>WhatsApp Bot</title>
+</head>
+<body>
+  <div class="container mt-5">
+    <h1>WhatsApp Bot</h1>
+    <form id="sessionForm">
+      <div class="form-group">
+        <label for="sessionName">Nome da Sessão</label>
+        <input type="text" class="form-control" id="sessionName" placeholder="Nome da Sessão">
+      </div>
+      <button type="submit" class="btn btn-warning">Criar Seção</button>
+    </form>
+
+    <div id="qrCodeContainer" class="mt-4 d-none">
+      <h3>QR Code</h3>
+      <img id="qrCodeImage" src="" alt="QR Code">
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // Conexão com o servidor WebSocket
+    const socket = io();
+
+    // Manipulador para o envio do formulário
+    $('#sessionForm').submit(function(e) {
+      e.preventDefault();
+
+      // Coleta dos dados do formulário
+      const sessionName = $('#sessionName').val();
+      const phoneNumber = $('#phoneNumber').val();
+      const message = $('#message').val();
+
+      // Envia os dados para o servidor
+      socket.emit('createSession', { sessionName, phoneNumber, message });
+    });
+
+    // Manipulador para a resposta do servidor
+    socket.on('sessionCreated', function(qrCodeData) {
+      // Exibe o QR code na view
+      $('#qrCodeImage').attr('src', qrCodeData);
+      $('#qrCodeContainer').removeClass('d-none');
+    });
+  </script>
+</body>
+</html>
