@@ -16,7 +16,7 @@ const fs = require('fs');
 const { response } = require('express');
 const cors = require('cors');
 
-const port = 3000;
+//const port = 3000;
 
 app.use(express.static('public'));
 app.use(express.json());
