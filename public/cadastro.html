@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <title>Cadastrar Usuario</title>
+</head>
+
+<body>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <h1 class="text-center">Cadastrar usuarios</h1>
+      <form id="cadastroForm">
+        <div class="form-group">
+          <label for="nome">Nome</label>
+          <input type="text" class="form-control" id="nome" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" class="form-control" id="email" required>
+        </div>
+        <div class="form-group">
+          <label for="senha">Senha</label>
+          <input type="password" class="form-control" id="senha" required>
+        </div>
+        <div class="form-group">
+          <label for="confirmarSenha">Confirmar Senha</label>
+          <input type="password" class="form-control" id="confirmarSenha" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Cadastrar</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+  document.getElementById("cadastroForm").addEventListener("submit", function (event) {
+    event.preventDefault(); // Impede o envio do formulário
+
+    var email = document.getElementById("email").value;
+    var nome = document.getElementById("nome").value;
+    var senha = document.getElementById("senha").value;
+    var confirmarSenha = document.getElementById("confirmarSenha").value;
+
+    if (email === "" || senha === "" || confirmarSenha === "") {
+      showAlert("Preencha todos os campos.", "danger");
+      return;
+    }
+
+    if (senha !== confirmarSenha) {
+      showAlert("A confirmação de senha não corresponde à senha digitada.", "danger");
+      return;
+    }
+    var data = {
+      name: nome,
+      email: email,
+      password: confirmarSenha
+    };
+
+    fetch('http://149.78.185.200:3000/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+            .then(function(response) {
+              if (response.ok) {
+                // Sucesso
+                showAlert("Cadastro efetuado com sucesso!", "success");
+              } else {
+                response.json().then(function(data) {
+                  // Erro
+                  if (data.field === 'email') {
+                    showAlert("O email já está cadastrado", "danger");
+                  } else {
+                    showAlert("Ocorreu um erro ao cadastrar", "danger");
+                  }
+                });
+                // Erro
+                //showAlert("Ocorreu um erro ao cadastrar.", "danger");
+              }
+            })
+            .catch(function(error) {
+              // Erro
+              showAlert("Ocorreu um erro na requisição: ", "danger" + error.message);
+            });
+
+  });
+
+  function showAlert(message, type) {
+    var alert = document.createElement("div");
+    alert.classList.add("alert", "alert-" + type);
+    alert.innerHTML = message;
+
+    var container = document.querySelector(".container");
+    container.insertBefore(alert, container.firstChild);
+
+    setTimeout(function () {
+      alert.remove();
+    }, 3000);
+  }
+</script>
+</body>
+
+</html>

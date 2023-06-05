@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Admin</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .container {
+            max-width: 400px;
+            margin-top: 100px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center">Login Usúarios</h1>
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" class="form-control" id="email" required>
+        </div>
+        <div class="form-group">
+            <label for="senha">Senha:</label>
+            <input type="password" class="form-control" id="senha" required>
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Fazer Login</button>
+        </div>
+    </form>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+<script>
+    document.getElementById("loginForm").addEventListener("submit", function(event) {
+        event.preventDefault(); // Evita o comportamento padrão do formulário
+
+        var email = document.getElementById("email").value;
+        var senha = document.getElementById("senha").value;
+
+        var data = {
+            email: email,
+            password: senha
+        };
+
+        fetch("http://149.78.185.200:3000/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        })
+            .then(function (response) {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("Credenciais inválidas");
+                }
+            })
+            .then(function (data) {
+                console.log(data);
+                const token = data.token;
+                // Salvar o token no localStorage
+                localStorage.setItem("token", token);
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html'; // Redireciona para o URL especificado após o tempo de espera
+                }, 3000);
+            })
+            .catch(function (error) {
+                // Erro no login
+                console.error(error);
+            });
+
+    });
+</script>
+</body>
+</html>

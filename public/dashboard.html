@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <title>WhatsApp Bot</title>
+</head>
+<body>
+<div class="container mt-5" id="tudo">
+  <h1>WhatsApp Bot</h1>
+  <form id="sessionForm">
+    <div class="form-group">
+      <label for="sessionName">Nome da Sessão</label>
+      <input type="text" class="form-control" id="sessionName" placeholder="Nome da Sessão">
+    </div>
+    <button type="submit" class="btn btn-warning">Criar Seção</button>
+  </form>
+
+  <div id="qrCodeContainer" class="mt-4 d-none">
+    <h3>QR Code</h3>
+    <img id="qrCodeImage" src="" alt="QR Code">
+  </div>
+</div>
+<div class="container mt-1 d-none" id="clientInfoContainer" >
+  <div  class="row mt-4 d-flex justify-content-center mb-5">
+    <h3 class="">Informações do Dispositivo</h3>
+  </div>
+  <div class="row">
+    <div class="col-2 d-flex justify-content-center align-items-center">
+      <div id="previewEurldiv" class="mt-4">
+        <img id="previewEurl"  class="border rounded" src="" alt="Img Perfil">
+      </div>
+    </div>
+    <div class="col-5 d-flex justify-content-center align-items-center ">
+      <div class="form-group w-100">
+        <label for="deviceName">Nome do Dispositivo</label>
+        <input type="text" class="form-control" id="deviceName" readonly>
+      </div>
+    </div>
+    <div class="col-5 d-flex justify-content-center align-items-center">
+      <div class="form-group w-100">
+        <label for="searchName">Número do Dispositivo</label>
+        <input type="text" class="form-control" id="searchName" readonly>
+      </div>
+    </div>
+  </div>
+  <div class="container mt-2">
+    <div class="form-group">
+      <label for="token-input">Token Session:</label>
+      <div class="input-group">
+        <input id="token-input" type="text" class="form-control" value="" readonly>
+        <div class="input-group-append">
+          <button class="btn btn-outline-success ml-1" type="button" onclick="copyToken()">
+            <i class="fa fa-copy"></i> Copiar
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="alert-container" class="alert alert-success mt-3 d-none" role="alert">
+      Token da Seção Copiado!
+    </div>
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.2/socket.io.js" integrity="sha512-jMNwWSmjje4fjYut9MBGKXw5FZA6D67NHAuC9szpjbbjg51KefquNfvn4DalCbGfkcv/jHsHnPo1o47+8u4biA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+  function copyToken() {
+    var tokenInput = document.getElementById("token-input");
+    tokenInput.select();
+    document.execCommand("copy");
+    showCopiedAlert();
+  }
+
+  function showCopiedAlert() {
+    var alertContainer = document.getElementById("alert-container");
+    alertContainer.classList.remove("d-none");
+    setTimeout(function() {
+      alertContainer.classList.add("d-none");
+    }, 2000);
+  }
+</script>
+
+<script>
+  // Conexão com o servidor WebSocket
+  const socket = io('http://149.78.185.200:3000');
+
+  // Manipulador para o envio do formulário
+  $('#sessionForm').submit(function(e) {
+    e.preventDefault();
+
+    // Coleta dos dados do formulário
+    const sessionName = $('#sessionName').val();
+    const phoneNumber = $('#phoneNumber').val();
+    const message = $('#message').val();
+
+    const token = localStorage.getItem('token');
+
+    if (token) {
+      // O token foi encontrado no LocalStorage
+      // Faça o que for necessário com o token...
+      console.log('Token recuperado:', token);
+    } else {
+      // O token não foi encontrado no LocalStorage
+      console.log('Token não encontrado no LocalStorage.');
+    }
+
+    // Envia os dados para o servidor
+    socket.emit('createSession', { sessionName, phoneNumber, message, token });
+  });
+
+  // Manipulador para a resposta do servidor
+  socket.on('sessionCreated', function(qrCodeData) {
+    //console.log('Informações do QrCode:', qrCodeData);
+
+    // Exibe o QR code na view
+    $('#qrCodeImage').attr('src', qrCodeData);
+    $('#qrCodeContainer').removeClass('d-none');
+  });
+
+  // Manipulador para exibir as informações do cliente
+  socket.on('clientInfo', function(data) {
+    //console.log('Informações do cliente recebidas:', clientInfo);
+    const { clientInfo, token_session } = data;
+    console.log('Token da Sessão:', token_session);
+    // Salvar o token no localStorage
+    //localStorage.setItem("token_session", token_session);
+    //console.log('Token da Seção é:', token_session);
+
+    //const palavraComPrefixo = 'token_session_' + token_session; // Adicionando o prefixo antes da variável
+
+    if (clientInfo && clientInfo.displayName) {
+      // Preenche os campos com as informações do dispositivo
+      $('#deviceName').val(clientInfo.displayName);
+      $('#searchName').val(clientInfo.id.user);
+      $('#previewEurl').attr('src', clientInfo.previewEurl);
+      $('#token-input').val(token_session);
+
+
+      // Exibe as informações na view
+      $('#clientInfoContainer').removeClass('d-none');
+      // Obtém o elemento com o ID "tudo"
+      var tudoElement = document.getElementById('tudo');
+
+      // Define o estilo display: none para o elemento
+      tudoElement.style.display = 'none';
+    } else {
+      console.log('As informações do cliente não estão disponíveis ou faltam o displayName.');
+    }
+  });
+</script>
+</body>
+</html>
