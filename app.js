@@ -249,8 +249,23 @@ app.use((req, res, next) => {
   next();
 });
 
-server.listen(port, () => {
-  console.log(`Servidor rodando na porta http://localhost:${port}`);
+// Obtém uma porta disponível
+function getAvailablePort(callback) {
+  const server = http.createServer();
+  server.listen(0);
+  server.on('listening', () => {
+    const port = server.address().port;
+    server.close(() => {
+      callback(port);
+    });
+  });
+}
+
+// Inicia o servidor na primeira porta disponível
+getAvailablePort((port) => {
+  server.listen(port, () => {
+    console.log(`Servidor rodando em http://localhost:${port}`);
+  });
 });
 
 startSessions();
