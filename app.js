@@ -16,7 +16,7 @@ const fs = require('fs');
 const { response } = require('express');
 const cors = require('cors');
 
-//const port = 3000;
+const port = 3000;
 
 app.use(express.static('public'));
 app.use(express.json());
@@ -249,23 +249,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Obtém uma porta disponível
-function getAvailablePort(callback) {
-  const server = http.createServer();
-  server.listen(0);
-  server.on('listening', () => {
-    const port = server.address().port;
-    server.close(() => {
-      callback(port);
-    });
-  });
-}
-
-// Inicia o servidor na primeira porta disponível
-getAvailablePort((port) => {
-  server.listen(port, () => {
-    console.log(`Servidor rodando em http://localhost:${port}`);
-  });
+server.listen(port, () => {
+  console.log(`Servidor rodando na porta http://localhost:${port}`);
 });
 
 startSessions();
