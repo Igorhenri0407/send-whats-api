@@ -250,7 +250,7 @@ app.use((req, res, next) => {
 });
 
 server.listen(port, () => {
-  console.log(`Servidor rodando na porta http://localhost:${port}`);
+  console.log(`Servidor rodando na porta http://3.128.190.239:${port}`);
 });
 
 startSessions();
